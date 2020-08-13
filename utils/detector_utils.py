@@ -17,7 +17,7 @@ sys.path.append("..")
 # score threshold for showing bounding boxes.
 _score_thresh = 0.27
 
-MODEL_NAME = 'hand_inference_graph'
+MODEL_NAME = os.path.join(os.getcwd(),'handtracking/hand_inference_graph')
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
 # List of the strings that is used to add correct label for each box.
@@ -50,7 +50,12 @@ def load_inference_graph():
 
 # draw the detected bounding boxes on the images
 # You can modify this to also draw a label.
-def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np):
+def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np, color_image, count, frame_path, video_name):
+    
+    save_path= join(frame_path, video_name)
+    if not os.path.exists(save_path):
+      os.makedirs(save_path)
+    
     for i in range(num_hands_detect):
         if (scores[i] > score_thresh):
             (left, right, top, bottom) = (boxes[i][1] * im_width, boxes[i][3] * im_width,
@@ -58,6 +63,16 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
             p1 = (int(left), int(top))
             p2 = (int(right), int(bottom))
             cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1)
+            filename= join(save_path, str(count) + '.png')
+            try:
+                #crop the image based on bounding box but add a buffer of 50 pixels to match the cnn's dataset
+                temp_image= color_image[int(top)-50:int(bottom)+50, int(left)-50:int(right)+50]
+                #image is rotated
+                temp_image = cv2.rotate(temp_image, cv2.ROTATE_90_CLOCKWISE)
+                cv2.imwrite(filename, temp_image)
+                #print(cv2.imwrite(filename, temp_image), "FILE SAVED!!!!!")
+            except:
+                print("error in saving frames")
 
 
 # Show fps value on image.
