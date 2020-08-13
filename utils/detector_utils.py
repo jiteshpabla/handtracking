@@ -50,11 +50,7 @@ def load_inference_graph():
 
 # draw the detected bounding boxes on the images
 # You can modify this to also draw a label.
-def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np, color_image, count, frame_path, video_name):
-    
-    save_path= join(frame_path, video_name)
-    if not os.path.exists(save_path):
-      os.makedirs(save_path)
+def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, im_height, image_np, color_image, frame_num, frame_video_path):
     
     for i in range(num_hands_detect):
         if (scores[i] > score_thresh):
@@ -63,13 +59,14 @@ def draw_box_on_image(num_hands_detect, score_thresh, scores, boxes, im_width, i
             p1 = (int(left), int(top))
             p2 = (int(right), int(bottom))
             cv2.rectangle(image_np, p1, p2, (77, 255, 9), 3, 1)
-            filename= join(save_path, str(count) + '.png')
+            #save each frame as frame number within the folder
+            filename= join(frame_video_path, str(frame_num) + '.png')
             try:
                 #crop the image based on bounding box but add a buffer of 50 pixels to match the cnn's dataset
-                temp_image= color_image[int(top)-50:int(bottom)+50, int(left)-50:int(right)+50]
+                cropped_image= color_image[int(top)-50:int(bottom)+50, int(left)-50:int(right)+50]
                 #image is rotated
-                temp_image = cv2.rotate(temp_image, cv2.ROTATE_90_CLOCKWISE)
-                cv2.imwrite(filename, temp_image)
+                cropped_image = cv2.rotate(cropped_image, cv2.ROTATE_90_CLOCKWISE)
+                cv2.imwrite(filename, cropped_image)
                 #print(cv2.imwrite(filename, temp_image), "FILE SAVED!!!!!")
             except:
                 print("error in saving frames")
