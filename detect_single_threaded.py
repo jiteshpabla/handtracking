@@ -72,7 +72,7 @@ if __name__ == '__main__':
         help='Frames folder path.')
     parser.add_argument(
         '-filename',
-        '--video',
+        '--video_name',
         dest='video_name',
         default=0,
         help='Video name.')
