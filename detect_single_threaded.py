@@ -3,6 +3,7 @@ import cv2
 import tensorflow as tf
 import datetime
 import argparse
+import os
 
 detection_graph, sess = detector_utils.load_inference_graph()
 
@@ -91,15 +92,16 @@ if __name__ == '__main__':
     #cannot open window in google colab
     #cv2.namedWindow('Single-Threaded Detection', cv2.WINDOW_NORMAL)
 
-    ret= True
-    count=0
-    while ret:
+    #flag to make sure code doesnt run when image doesnt load properly
+    ok_flag = True
+    while ok_flag:
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         #frame may not be read properly; a do-while type implemetation to avoid crashes
         ret, image_np = cap.read()
+        ok_flag = ret
         #to save the original image
         temp_image= image_np
-        if ret:
+        if ok_flag:
             # image_np = cv2.flip(image_np, 1)
             try:
                 image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
@@ -114,14 +116,21 @@ if __name__ == '__main__':
             boxes, scores = detector_utils.detect_objects(image_np,
                                                           detection_graph, sess)
             
-            count += 1
-            # draw bounding boxes on frame
-            detector_utils.draw_box_on_image(num_hands_detect, args.score_thresh,
-                                             scores, boxes, im_width, im_height,
-                                             image_np, temp_image, count, args.frame_path, args.video_name)
-
             # Calculate Frames per second (FPS)
             num_frames += 1
+            
+            #declare a path to save the frames
+            frame_folder_path = join(args.frame_path, args.video_name)
+            if not os.path.exists(frame_folder_path):
+                os.makedirs(frame_folder_path)
+                
+            # draw bounding boxes on frame
+            #send the original image and it's save path
+            detector_utils.draw_box_on_image(num_hands_detect, args.score_thresh,
+                                             scores, boxes, im_width, im_height,
+                                             image_np, temp_image, num_frames, frame_folder_path)
+
+            
             elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
             fps = num_frames / elapsed_time
         else:
