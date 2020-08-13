@@ -101,12 +101,11 @@ if __name__ == '__main__':
         temp_image= image_np
         if ret:
             # image_np = cv2.flip(image_np, 1)
-            if not image_np is None:
-                try:
-                    image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
-                    #print("converting to RGB")
-                except:
-                    print("Error converting to RGB")
+            try:
+                image_np = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+                #print("converting to RGB")
+            except:
+                print("Error converting to RGB")
 
             # Actual detection. Variable boxes contains the bounding box cordinates for hands detected,
             # while scores contains the confidence for each of these boxes.
